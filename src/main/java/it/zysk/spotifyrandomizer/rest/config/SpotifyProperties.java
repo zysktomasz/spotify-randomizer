@@ -14,4 +14,5 @@ import org.springframework.context.annotation.Configuration;
 public class SpotifyProperties {
     String clientId;
     String clientSecret;
+    String redirectUri;
 }
