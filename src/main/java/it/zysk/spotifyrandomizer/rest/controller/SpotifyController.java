@@ -6,6 +6,7 @@ import com.wrapper.spotify.model_objects.specification.User;
 import it.zysk.spotifyrandomizer.rest.service.SpotifyApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,5 +37,12 @@ public class SpotifyController {
             @RequestParam("playlistId") String playlistId
     ) {
         return SpotifyApiService.getPlaylistsTracks(playlistId);
+    }
+
+    @PutMapping("reorderTracks")
+    public boolean reorderTracks(
+            @RequestParam("playlistId") String playlistId
+    ) {
+        return SpotifyApiService.reorderTracksInPlaylist(playlistId);
     }
 }

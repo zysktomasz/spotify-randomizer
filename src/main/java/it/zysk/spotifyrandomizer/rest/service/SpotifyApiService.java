@@ -4,14 +4,18 @@ import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import com.wrapper.spotify.model_objects.special.SnapshotResult;
 import com.wrapper.spotify.model_objects.specification.Paging;
+import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
+import com.wrapper.spotify.requests.data.playlists.GetPlaylistRequest;
 import com.wrapper.spotify.requests.data.playlists.GetPlaylistsItemsRequest;
+import com.wrapper.spotify.requests.data.playlists.ReorderPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
 import lombok.AccessLevel;
@@ -25,6 +29,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +38,7 @@ import java.util.stream.Stream;
 // TODO: 31.03.2021 temp solution show that SpotifyApi could be shared across different components
 public class SpotifyApiService {
 
-    private static final List<String> SCOPES = List.of("user-read-private", "user-read-email");
+    private static final List<String> SCOPES = List.of("user-read-private", "user-read-email", "playlist-modify-public");
     private static final String SPACE_DELIMITER = " ";
 
     @Getter
@@ -141,6 +146,43 @@ public class SpotifyApiService {
         }
 
         return tracks;
+    }
+
+    // TODO: 01.04.2021 it's just proof of concept solution
+    public static boolean reorderTracksInPlaylist(String playlistId) {
+        Objects.requireNonNull(playlistId);
+
+        // get playlists details
+        GetPlaylistRequest getPlaylistRequest = spotifyApi
+                .getPlaylist(playlistId)
+                .build();
+
+        boolean isSuccessful = false;
+        try {
+            Playlist playlist = getPlaylistRequest.execute();
+
+            Integer totalTracks = playlist.getTracks().getTotal();
+
+            Random random = new Random();
+            for (int i = 0; i < totalTracks; i++) {
+                int newTrackPosition = random.nextInt(totalTracks) + 1;
+
+                System.out.println(i + " -> " + newTrackPosition);
+
+                ReorderPlaylistsItemsRequest reorderPlaylistsItemsRequest = spotifyApi
+                        .reorderPlaylistsItems(playlistId, i, newTrackPosition)
+//                        .snapshot_id(latestSnapshot)
+                        .build();
+
+                reorderPlaylistsItemsRequest.execute();
+            }
+            isSuccessful = true;
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            // todo: handle exception
+            e.printStackTrace();
+        }
+
+        return isSuccessful;
     }
 
     private static void setCredentials(AuthorizationCodeCredentials authorizationCodeCredentials) {
