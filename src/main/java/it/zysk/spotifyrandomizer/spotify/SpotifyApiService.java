@@ -1,4 +1,4 @@
-package it.zysk.spotifyrandomizer.rest.service;
+package it.zysk.spotifyrandomizer.spotify;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,15 +34,11 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component
+@Service
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 // TODO: 31.03.2021 temp solution show that SpotifyApi could be shared across different components
 public class SpotifyApiService {
 
-    private static final List<String> SCOPES = List.of("user-read-private", "user-read-email", "playlist-modify-public");
-    private static final String SPACE_DELIMITER = " ";
-
-    @Getter
     private static SpotifyApi spotifyApi;
 
     public SpotifyApiService(SpotifyProperties spotifyProperties) {
@@ -50,29 +47,6 @@ public class SpotifyApiService {
                 .setClientSecret(spotifyProperties.getClientSecret())
                 .setRedirectUri(SpotifyHttpManager.makeUri(spotifyProperties.getRedirectUri()))
                 .build();
-    }
-
-    public static URI buildAuthorizationCodeURI() {
-        AuthorizationCodeUriRequest authorizationCodeRequest = spotifyApi
-                .authorizationCodeUri()
-                .scope(joinScopesByDelimiter())
-                .build();
-
-        return authorizationCodeRequest.execute();
-    }
-
-    public static void retrieveAndSetUserCredentials(String authorizationCode) {
-        AuthorizationCodeRequest build = getSpotifyApi()
-                .authorizationCode(authorizationCode)
-                .build();
-
-        try {
-            AuthorizationCodeCredentials authorizationCodeCredentials = build.execute();
-            setCredentials(authorizationCodeCredentials);
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // todo: handle exception
-            e.printStackTrace();
-        }
     }
 
     public static User getCurrentUsersProfile() {
@@ -190,7 +164,4 @@ public class SpotifyApiService {
         spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
     }
 
-    private static String joinScopesByDelimiter() {
-        return String.join(SPACE_DELIMITER, SCOPES);
-    }
 }
