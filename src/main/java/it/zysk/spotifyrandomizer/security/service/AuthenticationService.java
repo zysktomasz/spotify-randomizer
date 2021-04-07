@@ -1,8 +1,13 @@
-package it.zysk.spotifyrandomizer.authentication.service;
+package it.zysk.spotifyrandomizer.security.service;
 
+import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetails;
+import it.zysk.spotifyrandomizer.spotify.SpotifyApiClientForUserFactory;
 import it.zysk.spotifyrandomizer.spotify.SpotifyApiClientProvider;
+import it.zysk.spotifyrandomizer.spotify.SpotifyUser;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,7 @@ import java.util.Objects;
 public class AuthenticationService {
 
     private final SpotifyApiClientProvider spotifyApiClientProvider;
+    private final SpotifyApiClientForUserFactory spotifyApiClientForUserFactory;
 
     private static final List<String> SCOPES = List.of("user-read-private", "user-read-email", "playlist-modify-public");
     private static final String SPACE_DELIMITER = " ";
@@ -45,6 +51,30 @@ public class AuthenticationService {
                     .accessToken(authorizationCodeCredentials.getAccessToken())
                     .refreshToken(authorizationCodeCredentials.getRefreshToken())
                     .expiresIn(authorizationCodeCredentials.getExpiresIn())
+                    .build();
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            // todo: handle exception
+            e.printStackTrace();
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public SpotifyUser retrieveUserByAccessToken(String accessToken) {
+        Objects.requireNonNull(accessToken);
+
+        SpotifyApi spotifyApi = spotifyApiClientForUserFactory.apply(accessToken);
+
+        GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi
+                .getCurrentUsersProfile()
+                .build();
+
+        try {
+            User user = getCurrentUsersProfileRequest.execute();
+            return SpotifyUser.builder()
+                    .id(user.getId())
+                    .displayName(user.getDisplayName())
+                    .email(user.getEmail())
+                    .accessToken(accessToken)
                     .build();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
