@@ -1,6 +1,6 @@
-package it.zysk.spotifyrandomizer.security.controller;
+package it.zysk.spotifyrandomizer.rest.controller;
 
-import it.zysk.spotifyrandomizer.security.service.AuthenticationService;
+import it.zysk.spotifyrandomizer.service.auth.AuthenticationService;
 import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

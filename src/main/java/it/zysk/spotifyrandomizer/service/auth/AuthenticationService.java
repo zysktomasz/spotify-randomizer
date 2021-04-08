@@ -1,13 +1,13 @@
-package it.zysk.spotifyrandomizer.security.service;
+package it.zysk.spotifyrandomizer.service.auth;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetails;
-import it.zysk.spotifyrandomizer.spotify.SpotifyApiClientForUserFactory;
-import it.zysk.spotifyrandomizer.spotify.SpotifyApiClientProvider;
-import it.zysk.spotifyrandomizer.spotify.SpotifyUser;
+import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientForUserFactory;
+import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientProvider;
+import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,8 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+
+    // TODO: 08.04.2021 add access token refreshing
 
     private final SpotifyApiClientProvider spotifyApiClientProvider;
     private final SpotifyApiClientForUserFactory spotifyApiClientForUserFactory;

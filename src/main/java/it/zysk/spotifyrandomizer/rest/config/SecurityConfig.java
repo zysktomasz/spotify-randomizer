@@ -1,7 +1,7 @@
 package it.zysk.spotifyrandomizer.rest.config;
 
-import it.zysk.spotifyrandomizer.security.filter.AccessTokenAuthenticationFilter;
-import it.zysk.spotifyrandomizer.security.service.AuthenticationService;
+import it.zysk.spotifyrandomizer.rest.filter.AccessTokenAuthenticationFilter;
+import it.zysk.spotifyrandomizer.service.auth.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;

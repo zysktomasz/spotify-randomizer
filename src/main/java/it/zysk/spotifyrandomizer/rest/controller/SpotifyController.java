@@ -3,7 +3,7 @@ package it.zysk.spotifyrandomizer.rest.controller;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
-import it.zysk.spotifyrandomizer.spotify.SpotifyApiService;
+import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;

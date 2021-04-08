@@ -1,6 +1,7 @@
-package it.zysk.spotifyrandomizer.spotify;
+package it.zysk.spotifyrandomizer.service.spotify.client;
 
 import com.wrapper.spotify.SpotifyApi;
+import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

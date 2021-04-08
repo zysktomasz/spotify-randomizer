@@ -1,6 +1,6 @@
-package it.zysk.spotifyrandomizer.security.filter;
+package it.zysk.spotifyrandomizer.rest.filter;
 
-import it.zysk.spotifyrandomizer.security.service.AuthenticationService;
+import it.zysk.spotifyrandomizer.service.auth.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +19,7 @@ import java.io.IOException;
 public class AccessTokenAuthenticationFilter implements Filter {
 
     private static final String BEARER_PREFIX = "Bearer ";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
 
     private final AuthenticationService authenticationService;
 
@@ -28,13 +29,13 @@ public class AccessTokenAuthenticationFilter implements Filter {
         var httpServletRequest = (HttpServletRequest) servletRequest;
         var httpServletResponse = (HttpServletResponse) servletResponse;
 
-        var authorization = httpServletRequest.getHeader("Authorization");
+        var authorization = httpServletRequest.getHeader(AUTHORIZATION_HEADER);
         if (authorization != null && authorization.startsWith(BEARER_PREFIX)) {
             var accessToken = authorization.substring(BEARER_PREFIX.length());
             var spotifyUser = authenticationService.retrieveUserByAccessToken(accessToken);
 
             if (spotifyUser == null) {
-                httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+                writeUnauthorizedResponse(httpServletResponse);
             }
 
             var authentication = new UsernamePasswordAuthenticationToken(spotifyUser, null);
@@ -43,6 +44,10 @@ public class AccessTokenAuthenticationFilter implements Filter {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         }
 
-        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+        writeUnauthorizedResponse(httpServletResponse);
+    }
+
+    public void writeUnauthorizedResponse(HttpServletResponse response) {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
 }

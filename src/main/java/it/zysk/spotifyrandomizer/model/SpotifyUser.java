@@ -1,4 +1,4 @@
-package it.zysk.spotifyrandomizer.spotify;
+package it.zysk.spotifyrandomizer.model;
 
 import lombok.Builder;
 import lombok.Value;

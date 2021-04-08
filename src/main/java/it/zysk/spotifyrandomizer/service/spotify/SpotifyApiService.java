@@ -1,4 +1,4 @@
-package it.zysk.spotifyrandomizer.spotify;
+package it.zysk.spotifyrandomizer.service.spotify;
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.Paging;
@@ -11,6 +11,7 @@ import com.wrapper.spotify.requests.data.playlists.GetPlaylistRequest;
 import com.wrapper.spotify.requests.data.playlists.GetPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.playlists.ReorderPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientForCurrentUserSupplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
@@ -25,13 +26,9 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-//@NoArgsConstructor(access = AccessLevel.PRIVATE)
-// TODO: 31.03.2021 temp solution show that SpotifyApi could be shared across different components
 public class SpotifyApiService {
 
-    private final SpotifyApiClientForUserFactory spotifyApiClientForUserFactory;
     private final SpotifyApiClientForCurrentUserSupplier spotifyApiClientForCurrentUserSupplier;
-
 
     public User getCurrentUsersProfile() {
         var spotifyApi = spotifyApiClientForCurrentUserSupplier.get();
