@@ -1,31 +1,22 @@
-package it.zysk.spotifyrandomizer.rest.service;
+package it.zysk.spotifyrandomizer.service.spotify;
 
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.SpotifyHttpManager;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import com.wrapper.spotify.model_objects.special.SnapshotResult;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
-import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
-import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
 import com.wrapper.spotify.requests.data.playlists.GetPlaylistRequest;
 import com.wrapper.spotify.requests.data.playlists.GetPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.playlists.ReorderPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
-import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientForCurrentUserSupplier;
+import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,67 +24,31 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component
-//@NoArgsConstructor(access = AccessLevel.PRIVATE)
-// TODO: 31.03.2021 temp solution show that SpotifyApi could be shared across different components
+@Service
+@RequiredArgsConstructor
 public class SpotifyApiService {
 
-    private static final List<String> SCOPES = List.of("user-read-private", "user-read-email", "playlist-modify-public");
-    private static final String SPACE_DELIMITER = " ";
+    private final SpotifyApiClientForCurrentUserSupplier spotifyApiClientForCurrentUserSupplier;
 
-    @Getter
-    private static SpotifyApi spotifyApi;
-
-    public SpotifyApiService(SpotifyProperties spotifyProperties) {
-        spotifyApi = SpotifyApi.builder()
-                .setClientId(spotifyProperties.getClientId())
-                .setClientSecret(spotifyProperties.getClientSecret())
-                .setRedirectUri(SpotifyHttpManager.makeUri(spotifyProperties.getRedirectUri()))
-                .build();
-    }
-
-    public static URI buildAuthorizationCodeURI() {
-        AuthorizationCodeUriRequest authorizationCodeRequest = spotifyApi
-                .authorizationCodeUri()
-                .scope(joinScopesByDelimiter())
-                .build();
-
-        return authorizationCodeRequest.execute();
-    }
-
-    public static void retrieveAndSetUserCredentials(String authorizationCode) {
-        AuthorizationCodeRequest build = getSpotifyApi()
-                .authorizationCode(authorizationCode)
-                .build();
-
-        try {
-            AuthorizationCodeCredentials authorizationCodeCredentials = build.execute();
-            setCredentials(authorizationCodeCredentials);
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // todo: handle exception
-            e.printStackTrace();
-        }
-    }
-
-    public static User getCurrentUsersProfile() {
+    public User getCurrentUsersProfile() {
+        var spotifyApi = spotifyApiClientForCurrentUserSupplier.get();
         Objects.requireNonNull(spotifyApi.getAccessToken());
 
         GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi
                 .getCurrentUsersProfile()
                 .build();
 
-        User user = null;
         try {
-            user = getCurrentUsersProfileRequest.execute();
+            return getCurrentUsersProfileRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
             e.printStackTrace();
+            throw new IllegalArgumentException();
         }
-
-        return user;
     }
 
-    public static List<PlaylistSimplified> getCurrentUsersPlaylists() {
+    public List<PlaylistSimplified> getCurrentUsersPlaylists() {
+        var spotifyApi = spotifyApiClientForCurrentUserSupplier.get();
         User currentUser = Objects.requireNonNull(getCurrentUsersProfile());
 
         GetListOfCurrentUsersPlaylistsRequest playlistsRequest = spotifyApi
@@ -123,7 +78,8 @@ public class SpotifyApiService {
         return playlists;
     }
 
-    public static List<PlaylistTrack> getPlaylistsTracks(String playlistId) {
+    public List<PlaylistTrack> getPlaylistsTracks(String playlistId) {
+        var spotifyApi = spotifyApiClientForCurrentUserSupplier.get();
         Objects.requireNonNull(playlistId);
 
         // either I'm using it wrongly or 'fields' in this request do not work as good
@@ -149,7 +105,8 @@ public class SpotifyApiService {
     }
 
     // TODO: 01.04.2021 it's just proof of concept solution
-    public static boolean reorderTracksInPlaylist(String playlistId) {
+    public boolean reorderTracksInPlaylist(String playlistId) {
+        var spotifyApi = spotifyApiClientForCurrentUserSupplier.get();
         Objects.requireNonNull(playlistId);
 
         // get playlists details
@@ -183,14 +140,5 @@ public class SpotifyApiService {
         }
 
         return isSuccessful;
-    }
-
-    private static void setCredentials(AuthorizationCodeCredentials authorizationCodeCredentials) {
-        spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
-        spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-    }
-
-    private static String joinScopesByDelimiter() {
-        return String.join(SPACE_DELIMITER, SCOPES);
     }
 }
