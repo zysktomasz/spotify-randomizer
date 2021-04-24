@@ -1,4 +1,4 @@
-package it.zysk.spotifyrandomizer.rest.config;
+package it.zysk.spotifyrandomizer.rest.configuration;
 
 import it.zysk.spotifyrandomizer.rest.filter.AccessTokenAuthenticationFilter;
 import it.zysk.spotifyrandomizer.service.auth.AuthenticationService;

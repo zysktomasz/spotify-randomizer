@@ -2,7 +2,7 @@ package it.zysk.spotifyrandomizer.service.spotify.client;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
-import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
+import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

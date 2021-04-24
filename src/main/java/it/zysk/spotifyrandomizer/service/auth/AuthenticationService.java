@@ -2,9 +2,9 @@ package it.zysk.spotifyrandomizer.service.auth;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
-import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetails;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientForUserFactory;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientProvider;
 import it.zysk.spotifyrandomizer.model.SpotifyUser;
@@ -25,6 +25,7 @@ public class AuthenticationService {
 
     private final SpotifyApiClientProvider spotifyApiClientProvider;
     private final SpotifyApiClientForUserFactory spotifyApiClientForUserFactory;
+    private final JwtService jwtService;
 
     private static final List<String> SCOPES = List.of("user-read-private", "user-read-email", "playlist-modify-public");
     private static final String SPACE_DELIMITER = " ";
@@ -38,7 +39,7 @@ public class AuthenticationService {
                 .execute();
     }
 
-    public UserAuthenticationDetails exchangeCodeForUserTokens(String authorizationCode) {
+    private AuthorizationCodeCredentials exchangeCodeForUserCredentials(String authorizationCode) {
         Objects.requireNonNull(authorizationCode); // todo: handle null code
         var authorizationCodeRequest = spotifyApiClientProvider
                 .get()
@@ -46,19 +47,19 @@ public class AuthenticationService {
                 .build();
 
         try {
-            var authorizationCodeCredentials = authorizationCodeRequest.execute();
-
-            // TODO: 03.04.2021 auto mapper
-            return UserAuthenticationDetails.builder()
-                    .accessToken(authorizationCodeCredentials.getAccessToken())
-                    .refreshToken(authorizationCodeCredentials.getRefreshToken())
-                    .expiresIn(authorizationCodeCredentials.getExpiresIn())
-                    .build();
+            return authorizationCodeRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
             e.printStackTrace();
             throw new IllegalArgumentException();
         }
+    }
+
+    public String authenticateUser(String authorizationCode) {
+        var authorizationCodeCredentials = exchangeCodeForUserCredentials(authorizationCode);
+        var spotifyUser = retrieveUserByAccessToken(authorizationCodeCredentials.getAccessToken());
+
+        return jwtService.buildSignedJwt(spotifyUser);
     }
 
     public SpotifyUser retrieveUserByAccessToken(String accessToken) {
@@ -72,6 +73,7 @@ public class AuthenticationService {
 
         try {
             User user = getCurrentUsersProfileRequest.execute();
+            // TODO: 24.04.2021 automapper
             return SpotifyUser.builder()
                     .id(user.getId())
                     .displayName(user.getDisplayName())
