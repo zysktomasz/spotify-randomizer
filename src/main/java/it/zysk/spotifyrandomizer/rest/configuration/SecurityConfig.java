@@ -1,7 +1,7 @@
 package it.zysk.spotifyrandomizer.rest.configuration;
 
-import it.zysk.spotifyrandomizer.rest.filter.AccessTokenAuthenticationFilter;
-import it.zysk.spotifyrandomizer.service.auth.AuthenticationService;
+import it.zysk.spotifyrandomizer.rest.filter.JwtAuthenticationFilter;
+import it.zysk.spotifyrandomizer.service.auth.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -19,10 +19,10 @@ public class SecurityConfig {
     @Configuration
     public static class ResourcesForAuthenticated extends WebSecurityConfigurerAdapter {
 
-        private final AccessTokenAuthenticationFilter accessTokenAuthenticationFilter;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-        public ResourcesForAuthenticated(AuthenticationService authenticationService) {
-            this.accessTokenAuthenticationFilter = new AccessTokenAuthenticationFilter(authenticationService);
+        public ResourcesForAuthenticated(JwtService jwtService) {
+            this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService);
         }
 
         @Override
@@ -34,7 +34,7 @@ public class SecurityConfig {
                     .and()
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
-                    .addFilterBefore(accessTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         }
     }
 
