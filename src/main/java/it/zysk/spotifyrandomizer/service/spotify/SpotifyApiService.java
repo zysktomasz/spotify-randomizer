@@ -11,6 +11,7 @@ import com.wrapper.spotify.requests.data.playlists.GetPlaylistRequest;
 import com.wrapper.spotify.requests.data.playlists.GetPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.playlists.ReorderPlaylistsItemsRequest;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+import it.zysk.spotifyrandomizer.dto.PlaylistSimpleDTO;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientForCurrentUserSupplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
@@ -47,7 +48,7 @@ public class SpotifyApiService {
         }
     }
 
-    public List<PlaylistSimplified> getCurrentUsersPlaylists() {
+    public List<PlaylistSimpleDTO> getCurrentUsersPlaylists() {
         var spotifyApi = spotifyApiClientForCurrentUserSupplier.get();
         User currentUser = Objects.requireNonNull(getCurrentUsersProfile());
 
@@ -55,7 +56,7 @@ public class SpotifyApiService {
                 .getListOfCurrentUsersPlaylists()
                 .build();
 
-        List<PlaylistSimplified> playlists = List.of();
+        List<PlaylistSimpleDTO> playlists = List.of();
         try {
             Paging<PlaylistSimplified> paging = playlistsRequest.execute();
 
@@ -69,6 +70,7 @@ public class SpotifyApiService {
                             .getDisplayName()
                             .equals(currentUser.getDisplayName())
                     )
+                    .map(PlaylistSimpleDTO::buildFromEntity)
                     .collect(Collectors.toList());
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
