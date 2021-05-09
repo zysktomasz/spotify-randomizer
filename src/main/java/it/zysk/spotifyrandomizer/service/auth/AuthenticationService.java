@@ -5,16 +5,16 @@ import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+import it.zysk.spotifyrandomizer.model.SpotifyUser;
+import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientForUserFactory;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientProvider;
-import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -26,8 +26,8 @@ public class AuthenticationService {
     private final SpotifyApiClientProvider spotifyApiClientProvider;
     private final SpotifyApiClientForUserFactory spotifyApiClientForUserFactory;
     private final JwtService jwtService;
+    private final SpotifyProperties spotifyProperties;
 
-    private static final List<String> SCOPES = List.of("user-read-private", "user-read-email", "playlist-modify-public");
     private static final String SPACE_DELIMITER = " ";
 
     public URI buildAuthorizationCodeURI() {
@@ -87,7 +87,7 @@ public class AuthenticationService {
         }
     }
 
-    private static String joinScopesByDelimiter() {
-        return String.join(SPACE_DELIMITER, SCOPES);
+    private String joinScopesByDelimiter() {
+        return String.join(SPACE_DELIMITER, spotifyProperties.getScopes());
     }
 }

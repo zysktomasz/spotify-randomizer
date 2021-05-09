@@ -1,0 +1,17 @@
+spotify:
+  client-id: e5035ca3a9d94937bd939d06831411dc
+  client-secret: 6bebc0ab73d94c9ca2b7f41c0a5c8164
+  redirect-uri: http://localhost:8080/auth/callback
+  scopes:
+    - user-read-private
+    - user-read-email
+    - playlist-modify-public
+    - playlist-read-private
+
+webapp:
+  url: http://localhost:3000
+  loginHandlerUrl: ${webapp.url}/loginHandler
+
+# base64 encoded secret key
+jwt:
+  secretKey: joqkIJHjd7Gwsa0Te2p2S0PRZg/kFrmY3xdfWZkN0uE=

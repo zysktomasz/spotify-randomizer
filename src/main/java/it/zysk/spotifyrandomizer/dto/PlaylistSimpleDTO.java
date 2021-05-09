@@ -7,10 +7,13 @@ import lombok.Value;
 @Value
 @Builder
 public class PlaylistSimpleDTO {
+
+    private static final String SPOTIFY_EXTERNAL_URL_KEY = "spotify";
+
     String id;
     String name;
     String ownerDisplayName;
-    String href;
+    String webPlayerUrl;
     String coverImageUrl;
     Boolean isPublic;
     String snapshotId;
@@ -22,7 +25,7 @@ public class PlaylistSimpleDTO {
                 .id(entity.getId())
                 .name(entity.getName())
                 .ownerDisplayName(entity.getOwner().getDisplayName())
-                .href(entity.getHref())
+                .webPlayerUrl(entity.getExternalUrls().get(SPOTIFY_EXTERNAL_URL_KEY))
                 .coverImageUrl(entity.getImages()[0].getUrl())
                 .isPublic(entity.getIsPublicAccess())
                 .snapshotId(entity.getSnapshotId())
