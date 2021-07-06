@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "clientId",
+      "type": "java.lang.String",
+      "description": "clientId of app from Spotify Dashboard."
+    },
+    {
+      "name": "clientSecret",
+      "type": "java.lang.String",
+      "description": "clientSecret of app from Spotify Dashboard."
+    },
+    {
+      "name": "redirectUri",
+      "type": "java.lang.String",
+      "description": "URL that Spotify redirects user back to after authentication attempt."
+    }
+  ]
+}
