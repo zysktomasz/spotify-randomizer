@@ -1,10 +1,12 @@
 package it.zysk.spotifyrandomizer.service.authentication.impl;
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
-import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetailsDTO;
+import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import it.zysk.spotifyrandomizer.service.authentication.AuthenticationService;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiClientFactory;
+import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String SPACE_DELIMITER = " ";
 
     private final SpotifyApiClientFactory spotifyApiClientFactory;
+    private final SpotifyApiService spotifyApiService;
 
     @Override
     public URI buildAuthorizationCodeURI() {
@@ -33,18 +36,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public UserAuthenticationDetailsDTO exchangeCodeForUserTokens(String code) {
+    public SpotifyUser authenticateUser(String code) {
+        var authorizationCodeCredentials = this.exchangeCodeUserCredentials(code);
+
+        // TODO: 06.07.2021 return JWT built from SpotifyUser
+        return this.spotifyApiService.getUserByAccessToken(authorizationCodeCredentials.getAccessToken());
+    }
+
+    private AuthorizationCodeCredentials exchangeCodeUserCredentials(String code) {
         // TODO: 06.07.2021 handle null 'code'
         var authorizationCodeRequest = this.spotifyApiClientFactory.getSpotifyApi().authorizationCode(code).build();
 
         try {
-            var authorizationCodeCredentials = authorizationCodeRequest.execute();
-
-            // TODO: 06.07.2021 auto mapper
-            return UserAuthenticationDetailsDTO.builder()
-                    .accessToken(authorizationCodeCredentials.getAccessToken())
-                    .refreshToken(authorizationCodeCredentials.getRefreshToken())
-                    .build();
+            return authorizationCodeRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // TODO: 06.07.2021 handle exception
             e.printStackTrace();

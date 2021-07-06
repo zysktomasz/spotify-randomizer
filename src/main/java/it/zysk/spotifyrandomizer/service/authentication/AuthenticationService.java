@@ -1,11 +1,11 @@
 package it.zysk.spotifyrandomizer.service.authentication;
 
-import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetailsDTO;
+import it.zysk.spotifyrandomizer.model.SpotifyUser;
 
 import java.net.URI;
 
 public interface AuthenticationService {
     URI buildAuthorizationCodeURI();
 
-    UserAuthenticationDetailsDTO exchangeCodeForUserTokens(String code);
+    SpotifyUser authenticateUser(String code);
 }

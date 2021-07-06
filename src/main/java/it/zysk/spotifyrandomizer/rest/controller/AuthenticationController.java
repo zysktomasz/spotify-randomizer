@@ -1,6 +1,6 @@
 package it.zysk.spotifyrandomizer.rest.controller;
 
-import it.zysk.spotifyrandomizer.dto.UserAuthenticationDetailsDTO;
+import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import it.zysk.spotifyrandomizer.service.authentication.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class AuthenticationController {
     @GetMapping(CALLBACK_ENDPOINT)
     @ResponseBody
     // TODO: 06.07.2021 exchange callback for user's tokens
-    public UserAuthenticationDetailsDTO callback(
+    public SpotifyUser callback(
             @RequestParam(value = CODE_REQUEST_PARAM, required = false) String code,
             @RequestParam(value = ERROR_REQUEST_PARAM, required = false) String error) {
         if (error != null && !error.isBlank()) {
@@ -46,6 +46,6 @@ public class AuthenticationController {
             // TODO: 06.07.2021 handle authentication error (user might've denied access or another reason)
         }
 
-        return this.authenticationService.exchangeCodeForUserTokens(code);
+        return this.authenticationService.authenticateUser(code);
     }
 }

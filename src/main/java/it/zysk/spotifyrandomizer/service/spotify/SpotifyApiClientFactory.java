@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import static it.zysk.spotifyrandomizer.util.SpotifyApiUtil.URIFromString;
 
-//@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Service
 @RequiredArgsConstructor
 public class SpotifyApiClientFactory {
@@ -20,5 +19,12 @@ public class SpotifyApiClientFactory {
                 .setClientSecret(this.spotifyProperties.getClientSecret())
                 .setRedirectUri(URIFromString(this.spotifyProperties.getRedirectUri()))
                 .build();
+    }
+
+    public SpotifyApi getSpotifyApiForAccessToken(String accessToken) {
+        var spotifyApi = this.getSpotifyApi();
+        spotifyApi.setAccessToken(accessToken);
+
+        return spotifyApi;
     }
 }
