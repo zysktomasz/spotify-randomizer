@@ -3,8 +3,8 @@ package it.zysk.spotifyrandomizer.service.authentication.impl;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
-import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import it.zysk.spotifyrandomizer.service.authentication.AuthenticationService;
+import it.zysk.spotifyrandomizer.service.jwt.JwtService;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiClientFactory;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final SpotifyApiClientFactory spotifyApiClientFactory;
     private final SpotifyApiService spotifyApiService;
+    private final JwtService jwtService;
 
     @Override
     public URI buildAuthorizationCodeURI() {
@@ -36,11 +37,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public SpotifyUser authenticateUser(String code) {
+    public String authenticateUser(String code) {
         var authorizationCodeCredentials = this.exchangeCodeUserCredentials(code);
+        var spotifyUser = this.spotifyApiService.getUserByAccessToken(authorizationCodeCredentials.getAccessToken());
 
-        // TODO: 06.07.2021 return JWT built from SpotifyUser
-        return this.spotifyApiService.getUserByAccessToken(authorizationCodeCredentials.getAccessToken());
+        return this.jwtService.buildSignedJwtForSpotifyUser(spotifyUser);
     }
 
     private AuthorizationCodeCredentials exchangeCodeUserCredentials(String code) {
