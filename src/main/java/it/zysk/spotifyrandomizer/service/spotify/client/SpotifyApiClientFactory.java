@@ -1,4 +1,4 @@
-package it.zysk.spotifyrandomizer.service.spotify;
+package it.zysk.spotifyrandomizer.service.spotify.client;
 
 import com.wrapper.spotify.SpotifyApi;
 import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
