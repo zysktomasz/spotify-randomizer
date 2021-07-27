@@ -2,7 +2,7 @@ package it.zysk.spotifyrandomizer.service.authentication.impl;
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
+import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
 import it.zysk.spotifyrandomizer.service.authentication.AuthenticationService;
 import it.zysk.spotifyrandomizer.service.jwt.JwtService;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;

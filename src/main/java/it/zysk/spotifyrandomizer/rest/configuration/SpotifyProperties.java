@@ -1,4 +1,4 @@
-package it.zysk.spotifyrandomizer.rest.config;
+package it.zysk.spotifyrandomizer.rest.configuration;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
 package it.zysk.spotifyrandomizer.service.authentication;
 
-import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
+import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
 import it.zysk.spotifyrandomizer.service.authentication.impl.AuthenticationServiceImpl;
 import it.zysk.spotifyrandomizer.service.jwt.JwtService;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;

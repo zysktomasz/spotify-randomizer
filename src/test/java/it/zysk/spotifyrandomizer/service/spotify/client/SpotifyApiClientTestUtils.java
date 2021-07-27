@@ -1,7 +1,7 @@
 package it.zysk.spotifyrandomizer.service.spotify.client;
 
 import com.wrapper.spotify.SpotifyApi;
-import it.zysk.spotifyrandomizer.rest.config.SpotifyProperties;
+import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
