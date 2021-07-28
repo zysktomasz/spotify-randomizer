@@ -15,6 +15,11 @@
     <description>Randomize songs in your spotify library</description>
     <properties>
         <java.version>16</java.version>
+        <lombok.version>1.18.20</lombok.version>
+        <spotify-web-api.version>6.5.4</spotify-web-api.version>
+        <junit-jupiter-engine.version>5.7.1</junit-jupiter-engine.version>
+        <mockito-junit-jupiter.version>3.6.28</mockito-junit-jupiter.version>
+        <jjwt.version>0.11.2</jjwt.version>
     </properties>
     <dependencies>
         <dependency>
@@ -30,13 +35,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>${lombok.version}</version>
         </dependency>
 
         <dependency>
             <groupId>se.michaelthelin.spotify</groupId>
             <artifactId>spotify-web-api-java</artifactId>
-            <version>6.5.4</version>
+            <version>${spotify-web-api.version}</version>
         </dependency>
 
         <dependency>
@@ -51,19 +56,17 @@
             </exclusions>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.1</version>
+            <version>${junit-jupiter-engine.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.6.28</version>
+            <version>${mockito-junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -76,20 +79,20 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.2</version>
+            <version>${jjwt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.2</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-            <version>0.11.2</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
