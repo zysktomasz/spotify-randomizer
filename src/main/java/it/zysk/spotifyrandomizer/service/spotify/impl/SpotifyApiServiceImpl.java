@@ -3,6 +3,7 @@ package it.zysk.spotifyrandomizer.service.spotify.impl;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import it.zysk.spotifyrandomizer.dto.PlaylistDTO;
@@ -10,10 +11,13 @@ import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +26,7 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class SpotifyApiServiceImpl implements SpotifyApiService {
 
     private final SpotifyApiClientFactory spotifyApiClientFactory;
@@ -57,7 +62,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
         User currentUser = Objects.requireNonNull(getCurrentUsersProfile());
 
-        List<PlaylistDTO> playlists = List.of();
+        List<PlaylistDTO> playlists;
         try {
             Paging<PlaylistSimplified> paging = spotifyApi
                     .getListOfCurrentUsersPlaylists()
@@ -77,6 +82,47 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
         }
 
         return playlists;
+    }
+
+    @Override
+    public List<PlaylistTrack> getTracks(String playlistId) {
+        // todo handle null playlistId
+        log.info("Retrieving tracks for playlist with playlist_id = '{}'", playlistId);
+        var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
+
+        String fields = "limit,next,offset,previous,total,items(added_at,track(album(id,name,images),artists,id,name,type))";
+        int limit = 10;
+        int offset = 0;
+
+        List<PlaylistTrack> tracks = new ArrayList<>();
+        try {
+            while (true) {
+                Paging<PlaylistTrack> pagedTracks = spotifyApi.getPlaylistsItems(playlistId)
+                        .fields(fields)
+                        .limit(limit)
+                        .offset(offset)
+                        .build()
+                        .execute();
+
+                PlaylistTrack[] items = pagedTracks.getItems();
+                if (items != null) {
+                    log.info("Retrieved {}-{} of {} tracks", offset + 1, offset + items.length, pagedTracks.getTotal());
+                    tracks.addAll(Arrays.asList(items));
+                }
+
+                if (pagedTracks.getNext() == null) {
+                    break;
+                }
+
+                offset += limit;
+            }
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            // todo: handle exception
+            e.printStackTrace();
+            throw new IllegalArgumentException();
+        }
+
+        return tracks;
     }
 
     private boolean isPlaylistOwnedByUser(PlaylistSimplified playlist, User user) {
