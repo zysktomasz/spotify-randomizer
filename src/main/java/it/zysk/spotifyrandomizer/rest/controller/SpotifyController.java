@@ -1,9 +1,11 @@
 package it.zysk.spotifyrandomizer.rest.controller;
 
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import it.zysk.spotifyrandomizer.dto.PlaylistDTO;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,9 +22,17 @@ public class SpotifyController {
 
     private final SpotifyApiService spotifyApiService;
     private static final String PLAYLIST_REQUEST_PATH = "playlist";
+    private static final String PLAYLIST_TRACKS_REQUEST_PATH = "playlist/{playlistId}/tracks";
 
     @GetMapping(PLAYLIST_REQUEST_PATH)
     public List<PlaylistDTO> getUserPlaylists() {
         return spotifyApiService.getCurrentUsersPlaylists();
+    }
+
+    @GetMapping(PLAYLIST_TRACKS_REQUEST_PATH)
+    public List<PlaylistTrack> getTracksByPlaylistId(
+            @PathVariable String playlistId
+    ) {
+        return spotifyApiService.getTracks(playlistId);
     }
 }
