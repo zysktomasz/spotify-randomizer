@@ -8,14 +8,7 @@ import lombok.Value;
 @Value
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @Builder
-public class PlaylistDTO {
-
+public class ArtistDTO {
     String id;
     String name;
-    String ownerDisplayName;
-    String webPlayerUrl;
-    String coverImageUrl;
-    Boolean isPublic;
-    String snapshotId;
-    Integer tracksCount;
 }

@@ -36,7 +36,7 @@ public class JwtServiceImpl implements JwtService {
                 .setSubject(spotifyUser.getId())
                 .claim(CLAIM_DISPLAY_NAME, spotifyUser.getDisplayName())
                 .claim(CLAIM_EMAIL, spotifyUser.getEmail())
-                .claim(CLAIM_ACCESS_TOKEN, spotifyUser.getAccessToken()) // TODO: 06.07.2021 do not return access token to front-end, store it server-side
+                .claim(CLAIM_ACCESS_TOKEN, spotifyUser.getAccessToken())
                 .setIssuer(ISSUER)
                 .setIssuedAt(new Date())
 //                .setExpiration() // TODO: 06.07.2021 add expiration time limit, once token refreshing is implemented
