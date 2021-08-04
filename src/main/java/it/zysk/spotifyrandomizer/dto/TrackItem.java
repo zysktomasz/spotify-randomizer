@@ -5,17 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Set;
+
 @Value
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @Builder
-public class PlaylistDTO {
-
+public class TrackItem implements PlaylistTrackItem {
     String id;
     String name;
-    String ownerDisplayName;
-    String webPlayerUrl;
-    String coverImageUrl;
-    Boolean isPublic;
-    String snapshotId;
-    Integer tracksCount;
+    String albumName;
+    Set<ArtistDTO> artists;
 }

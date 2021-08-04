@@ -5,8 +5,11 @@ import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
-import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import it.zysk.spotifyrandomizer.dto.PlaylistDTO;
+import it.zysk.spotifyrandomizer.dto.PlaylistTrackDTO;
+import it.zysk.spotifyrandomizer.mapper.PlaylistSimplifiedMapper;
+import it.zysk.spotifyrandomizer.mapper.PlaylistTrackMapper;
+import it.zysk.spotifyrandomizer.mapper.SpotifyUserMapper;
 import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientFactory;
@@ -31,25 +34,18 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
 
     private final SpotifyApiClientFactory spotifyApiClientFactory;
 
+    private final PlaylistSimplifiedMapper playlistSimplifiedMapper;
+    private final SpotifyUserMapper spotifyUserMapper;
+    private final PlaylistTrackMapper playlistTrackMapper;
+
     @Override
     public SpotifyUser getUserByAccessToken(String accessToken) {
         // TODO: 06.07.2021 handle null 'accessToken'
-
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForAccessToken(accessToken);
 
-        var getCurrentUsersProfileRequest = spotifyApi
-                .getCurrentUsersProfile()
-                .build();
-
         try {
-            User user = getCurrentUsersProfileRequest.execute();
-            // TODO: 06.07.2021 automapper
-            return SpotifyUser.builder()
-                    .id(user.getId())
-                    .displayName(user.getDisplayName())
-                    .email(user.getEmail())
-                    .accessToken(accessToken)
-                    .build();
+            var user = spotifyApi.getCurrentUsersProfile().build().execute();
+            return spotifyUserMapper.userToSpotifyUserWithAccessToken(user, accessToken);
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
             e.printStackTrace();
@@ -60,7 +56,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
     @Override
     public List<PlaylistDTO> getCurrentUsersPlaylists() {
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
-        User currentUser = Objects.requireNonNull(getCurrentUsersProfile());
+        var currentUser = Objects.requireNonNull(getCurrentUsersProfile());
 
         List<PlaylistDTO> playlists;
         try {
@@ -73,7 +69,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
                     .stream()
                     .flatMap(Stream::of)
                     .filter(playlist -> this.isPlaylistOwnedByUser(playlist, currentUser))
-                    .map(PlaylistDTO::buildFromEntity)
+                    .map(playlistSimplifiedMapper::playlistSimplifiedToPlaylistDTO)
                     .collect(Collectors.toList());
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
@@ -85,7 +81,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
     }
 
     @Override
-    public List<PlaylistTrack> getTracks(String playlistId) {
+    public List<PlaylistTrackDTO> getTracks(String playlistId) {
         // todo handle null playlistId
         log.info("Retrieving tracks for playlist with playlist_id = '{}'", playlistId);
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
@@ -122,7 +118,9 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
             throw new IllegalArgumentException();
         }
 
-        return tracks;
+        return tracks.stream()
+                .map(playlistTrackMapper::playlistTrackToPlaylistTrackDTO)
+                .collect(Collectors.toList());
     }
 
     private boolean isPlaylistOwnedByUser(PlaylistSimplified playlist, User user) {
@@ -133,12 +131,11 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
         Objects.requireNonNull(spotifyApi.getAccessToken()); // todo: add custom error handler
 
-        GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi
-                .getCurrentUsersProfile()
-                .build();
-
         try {
-            return getCurrentUsersProfileRequest.execute();
+            return spotifyApi
+                    .getCurrentUsersProfile()
+                    .build()
+                    .execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
             e.printStackTrace();
