@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -57,27 +54,44 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
     public List<PlaylistDTO> getCurrentUsersPlaylists() {
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
         var currentUser = Objects.requireNonNull(getCurrentUsersProfile());
+        log.info("Retrieving playlists of user = '{}'", currentUser.getDisplayName());
 
-        List<PlaylistDTO> playlists;
+        int limit = 100;
+        int offset = 0;
+
+        List<PlaylistSimplified> playlists = new ArrayList<>();
         try {
-            Paging<PlaylistSimplified> paging = spotifyApi
-                    .getListOfCurrentUsersPlaylists()
-                    .build()
-                    .execute();
+            while (true) {
+                Paging<PlaylistSimplified> pagedPlaylists = spotifyApi
+                        .getListOfCurrentUsersPlaylists()
+                        .limit(limit)
+                        .offset(offset)
+                        .build()
+                        .execute();
 
-            playlists = Optional.ofNullable(paging.getItems())
-                    .stream()
-                    .flatMap(Stream::of)
-                    .filter(playlist -> this.isPlaylistOwnedByUser(playlist, currentUser))
-                    .map(playlistSimplifiedMapper::playlistSimplifiedToPlaylistDTO)
-                    .collect(Collectors.toList());
+                PlaylistSimplified[] items = pagedPlaylists.getItems();
+                if (items != null) {
+                    log.info("Retrieved {}-{} of {} playlists", offset + 1, offset + items.length,
+                            pagedPlaylists.getTotal());
+                    playlists.addAll(Arrays.asList(items));
+                }
+
+                offset += limit;
+
+                if (pagedPlaylists.getNext() == null) {
+                    break;
+                }
+            }
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
             e.printStackTrace();
             throw new IllegalArgumentException();
         }
 
-        return playlists;
+        return playlists.stream()
+                .filter(playlist -> this.isPlaylistOwnedByUser(playlist, currentUser))
+                .map(playlistSimplifiedMapper::playlistSimplifiedToPlaylistDTO)
+                .toList();
     }
 
     @Override
@@ -87,7 +101,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
 
         String fields = "limit,next,offset,previous,total,items(added_at,track(album(id,name,images),artists,id,name,type))";
-        int limit = 10;
+        int limit = 100;
         int offset = 0;
 
         List<PlaylistTrack> tracks = new ArrayList<>();
@@ -102,15 +116,16 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
 
                 PlaylistTrack[] items = pagedTracks.getItems();
                 if (items != null) {
-                    log.info("Retrieved {}-{} of {} tracks", offset + 1, offset + items.length, pagedTracks.getTotal());
+                    log.info("Retrieved {}-{} of {} tracks", offset + 1, offset + items.length,
+                            pagedTracks.getTotal());
                     tracks.addAll(Arrays.asList(items));
                 }
+
+                offset += limit;
 
                 if (pagedTracks.getNext() == null) {
                     break;
                 }
-
-                offset += limit;
             }
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             // todo: handle exception
@@ -120,7 +135,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
 
         return tracks.stream()
                 .map(playlistTrackMapper::playlistTrackToPlaylistTrackDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private boolean isPlaylistOwnedByUser(PlaylistSimplified playlist, User user) {
