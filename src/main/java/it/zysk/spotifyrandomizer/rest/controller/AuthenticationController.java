@@ -36,7 +36,6 @@ public class AuthenticationController {
 
     @GetMapping(CALLBACK_ENDPOINT)
     @ResponseBody
-    // TODO: 06.07.2021 exchange callback for user's tokens
     public String callback(
             @RequestParam(value = CODE_REQUEST_PARAM, required = false) String code,
             @RequestParam(value = ERROR_REQUEST_PARAM, required = false) String error) {

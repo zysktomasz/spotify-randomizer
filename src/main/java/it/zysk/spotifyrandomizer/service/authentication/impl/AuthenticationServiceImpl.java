@@ -3,6 +3,8 @@ package it.zysk.spotifyrandomizer.service.authentication.impl;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
+import it.zysk.spotifyrandomizer.rest.exception.Validator;
+import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToAuthenticateUser;
 import it.zysk.spotifyrandomizer.service.authentication.AuthenticationService;
 import it.zysk.spotifyrandomizer.service.jwt.JwtService;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
@@ -44,17 +46,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private AuthorizationCodeCredentials exchangeCodeUserCredentials(String code) {
-        // TODO: 06.07.2021 handle null 'code'
-        var authorizationCodeRequest = spotifyApiClientFactory.getSpotifyApi()
-                .authorizationCode(code)
-                .build();
+        Validator.requireNotEmpty(code, "Parameter 'code' is required");
 
         try {
-            return authorizationCodeRequest.execute();
+            return spotifyApiClientFactory.getSpotifyApi().authorizationCode(code).build().execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // TODO: 06.07.2021 handle exception
-            e.printStackTrace();
-            throw new IllegalArgumentException();
+            throw new UnableToAuthenticateUser(e);
         }
     }
 
