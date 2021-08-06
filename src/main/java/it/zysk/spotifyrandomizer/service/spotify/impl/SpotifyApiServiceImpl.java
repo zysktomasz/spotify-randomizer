@@ -4,13 +4,16 @@ import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import com.wrapper.spotify.model_objects.specification.User;
 import it.zysk.spotifyrandomizer.dto.PlaylistDTO;
 import it.zysk.spotifyrandomizer.dto.PlaylistTrackDTO;
 import it.zysk.spotifyrandomizer.mapper.PlaylistSimplifiedMapper;
 import it.zysk.spotifyrandomizer.mapper.PlaylistTrackMapper;
 import it.zysk.spotifyrandomizer.mapper.SpotifyUserMapper;
 import it.zysk.spotifyrandomizer.model.SpotifyUser;
+import it.zysk.spotifyrandomizer.rest.exception.Validator;
+import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToRetrieveCurrentUsersPlaylists;
+import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToRetrieveCurrentUsersProfile;
+import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToRetrievePlaylistTracks;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientFactory;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -37,23 +39,23 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
 
     @Override
     public SpotifyUser getUserByAccessToken(String accessToken) {
-        // TODO: 06.07.2021 handle null 'accessToken'
+        Validator.requireNotEmpty(accessToken, "Parameter 'accessToken' is required");
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForAccessToken(accessToken);
 
         try {
             var user = spotifyApi.getCurrentUsersProfile().build().execute();
             return spotifyUserMapper.userToSpotifyUserWithAccessToken(user, accessToken);
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // todo: handle exception
-            e.printStackTrace();
-            throw new IllegalArgumentException();
+            throw new UnableToRetrieveCurrentUsersProfile(e);
         }
     }
 
     @Override
     public List<PlaylistDTO> getCurrentUsersPlaylists() {
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
-        var currentUser = Objects.requireNonNull(getCurrentUsersProfile());
+        var currentUser = getUserByAccessToken(spotifyApi.getAccessToken());
+        Validator.requireNotNull(currentUser, "User is required");
+
         log.info("Retrieving playlists of user = '{}'", currentUser.getDisplayName());
 
         int limit = 100;
@@ -83,20 +85,18 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
                 }
             }
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // todo: handle exception
-            e.printStackTrace();
-            throw new IllegalArgumentException();
+            throw new UnableToRetrieveCurrentUsersPlaylists(e);
         }
 
         return playlists.stream()
-                .filter(playlist -> this.isPlaylistOwnedByUser(playlist, currentUser))
+                .filter(playlist -> playlist.getOwner().getDisplayName().equals(currentUser.getDisplayName()))
                 .map(playlistSimplifiedMapper::playlistSimplifiedToPlaylistDTO)
                 .toList();
     }
 
     @Override
     public List<PlaylistTrackDTO> getTracks(String playlistId) {
-        // todo handle null playlistId
+        Validator.requireNotEmpty(playlistId, "Parameter 'playlistId' is required");
         log.info("Retrieving tracks for playlist with playlist_id = '{}'", playlistId);
         var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
 
@@ -128,33 +128,11 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
                 }
             }
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // todo: handle exception
-            e.printStackTrace();
-            throw new IllegalArgumentException();
+            throw new UnableToRetrievePlaylistTracks(playlistId, e);
         }
 
         return tracks.stream()
                 .map(playlistTrackMapper::playlistTrackToPlaylistTrackDTO)
                 .toList();
-    }
-
-    private boolean isPlaylistOwnedByUser(PlaylistSimplified playlist, User user) {
-        return playlist.getOwner().getDisplayName().equals(user.getDisplayName());
-    }
-
-    private User getCurrentUsersProfile() {
-        var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
-        Objects.requireNonNull(spotifyApi.getAccessToken()); // todo: add custom error handler
-
-        try {
-            return spotifyApi
-                    .getCurrentUsersProfile()
-                    .build()
-                    .execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            // todo: handle exception
-            e.printStackTrace();
-            throw new IllegalArgumentException();
-        }
     }
 }
