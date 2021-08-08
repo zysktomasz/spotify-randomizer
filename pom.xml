@@ -189,7 +189,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>90%</minimum> <!-- TODO: increase minimum coverage -->
+                                            <minimum>20%</minimum> <!-- TODO: increase minimum coverage -->
                                         </limit>
                                     </limits>
                                 </rule>
