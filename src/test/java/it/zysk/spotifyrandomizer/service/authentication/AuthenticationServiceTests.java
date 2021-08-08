@@ -63,6 +63,6 @@ public class AuthenticationServiceTests {
         return PARAM_CLIENT_ID + "=" + spotifyProperties.getClientId() +
                 "&" + PARAM_RESPONSE_TYPE + "=code" +
                 "&" + PARAM_REDIRECT_URI + "=" + spotifyProperties.getRedirectUri() +
-                "&" + PARAM_SCOPE + "=" + String.join("+", spotifyProperties.getScopes());
+                "&" + PARAM_SCOPE + "=" + String.join(" ", spotifyProperties.getScopes());
     }
 }
