@@ -15,7 +15,7 @@ jobs:
         with:
           distribution: 'jdkfile'
           jdkFile: ${{ runner.temp }}/java_package.tar.gz
-          java-version: '16.0.1_9'
+          java-version: '16.0.1'
           architecture: x64
       - name: site - reports
         run: mvn site
