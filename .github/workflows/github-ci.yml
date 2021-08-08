@@ -3,7 +3,7 @@ name: Java Maven CI
 on: [ push ]
 
 jobs:
-  mvn-site-and-verify:
+  test_and_build_reports:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +23,12 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: site - reports
+      - name: mvn site - build reports
         run: mvn site
-      - name: verify
+      - name: mvn verify
         run: mvn verify
+      - name: Archive project reports (tests and coverage)
+        uses: actions/upload-artifact@v2
+        with:
+          name: reports
+          path: target/site
