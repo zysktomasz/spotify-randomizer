@@ -23,6 +23,8 @@ public class AuthenticationServiceTests {
     private static final String PARAM_RESPONSE_TYPE = "response_type";
     private static final String PARAM_REDIRECT_URI = "redirect_uri";
     private static final String PARAM_SCOPE = "scope";
+    private static final String SPACE = " ";
+    private static final String AMPERSAND = "&";
 
     @Mock
     private SpotifyApiClientFactory spotifyApiClientFactory;
@@ -61,8 +63,8 @@ public class AuthenticationServiceTests {
 
     private String buildAuthorizationQuery(SpotifyProperties spotifyProperties) {
         return PARAM_CLIENT_ID + "=" + spotifyProperties.getClientId() +
-                "&" + PARAM_RESPONSE_TYPE + "=code" +
-                "&" + PARAM_REDIRECT_URI + "=" + spotifyProperties.getRedirectUri() +
-                "&" + PARAM_SCOPE + "=" + String.join("+", spotifyProperties.getScopes());
+                AMPERSAND + PARAM_RESPONSE_TYPE + "=code" +
+                AMPERSAND + PARAM_REDIRECT_URI + "=" + spotifyProperties.getRedirectUri() +
+                AMPERSAND + PARAM_SCOPE + "=" + String.join(SPACE, spotifyProperties.getScopes());
     }
 }
