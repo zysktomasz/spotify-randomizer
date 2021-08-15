@@ -58,7 +58,7 @@ public class SpotifyApiServiceImpl implements SpotifyApiService {
 
         log.info("Retrieving playlists of user = '{}'", currentUser.getDisplayName());
 
-        int limit = 100;
+        int limit = 50;
         int offset = 0;
 
         List<PlaylistSimplified> playlists = new ArrayList<>();
