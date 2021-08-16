@@ -1,7 +1,6 @@
 package it.zysk.spotifyrandomizer.service.authentication;
 
 import it.zysk.spotifyrandomizer.rest.configuration.SpotifyProperties;
-import it.zysk.spotifyrandomizer.service.authentication.impl.AuthenticationServiceImpl;
 import it.zysk.spotifyrandomizer.service.jwt.JwtService;
 import it.zysk.spotifyrandomizer.service.spotify.SpotifyApiService;
 import it.zysk.spotifyrandomizer.service.spotify.client.SpotifyApiClientFactory;
@@ -42,7 +41,7 @@ public class AuthenticationServiceTests {
 
     @BeforeEach
     void setup() {
-        this.authenticationService = new AuthenticationServiceImpl(
+        this.authenticationService = new AuthenticationService(
                 this.spotifyApiClientFactory,
                 this.spotifyApiService,
                 this.jwtService,

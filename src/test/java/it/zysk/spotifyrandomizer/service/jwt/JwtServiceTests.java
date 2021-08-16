@@ -2,7 +2,6 @@ package it.zysk.spotifyrandomizer.service.jwt;
 
 import io.jsonwebtoken.Claims;
 import it.zysk.spotifyrandomizer.model.SpotifyUser;
-import it.zysk.spotifyrandomizer.service.jwt.impl.JwtServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import static it.zysk.spotifyrandomizer.service.jwt.JwtServiceTestUtils.CLAIM_ACCESS_TOKEN;
@@ -20,7 +19,7 @@ public class JwtServiceTests {
             .accessToken("accessToken_value")
             .build();
 
-    private final JwtService jwtService = new JwtServiceImpl(JWT_KEY);
+    private final JwtService jwtService = new JwtService(JWT_KEY);
 
     @Test
     void Should_HaveExpectedClaims_When_BuiltJwtFromSpotifyUser() {
