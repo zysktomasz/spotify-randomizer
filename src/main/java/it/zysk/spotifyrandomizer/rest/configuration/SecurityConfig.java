@@ -73,6 +73,7 @@ public class SecurityConfig {
 
             http
                     .antMatcher("/api/**")
+                    .csrf().disable()
                     .cors()
                     .and()
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
