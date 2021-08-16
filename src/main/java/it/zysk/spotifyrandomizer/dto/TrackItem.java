@@ -8,6 +8,7 @@ import java.util.Set;
 public record TrackItem(String id,
                         String name,
                         String albumName,
+                        String albumImageUrl,
                         Set<ArtistDTO> artists) implements PlaylistTrackItem {
     @Override
     public String getId() {
