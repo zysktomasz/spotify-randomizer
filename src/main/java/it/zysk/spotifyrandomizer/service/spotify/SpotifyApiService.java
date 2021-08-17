@@ -2,8 +2,10 @@ package it.zysk.spotifyrandomizer.service.spotify;
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.Paging;
+import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
+import com.wrapper.spotify.requests.data.playlists.ReorderPlaylistsItemsRequest;
 import it.zysk.spotifyrandomizer.dto.PlaylistDTO;
 import it.zysk.spotifyrandomizer.dto.PlaylistTrackDTO;
 import it.zysk.spotifyrandomizer.mapper.PlaylistSimplifiedMapper;
@@ -11,6 +13,7 @@ import it.zysk.spotifyrandomizer.mapper.PlaylistTrackMapper;
 import it.zysk.spotifyrandomizer.mapper.SpotifyUserMapper;
 import it.zysk.spotifyrandomizer.model.SpotifyUser;
 import it.zysk.spotifyrandomizer.rest.exception.Validator;
+import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToReorderPlaylistTracks;
 import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToRetrieveCurrentUsersPlaylists;
 import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToRetrieveCurrentUsersProfile;
 import it.zysk.spotifyrandomizer.rest.exception.exceptions.UnableToRetrievePlaylistTracks;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @RequiredArgsConstructor
 @Service
@@ -130,5 +134,34 @@ public class SpotifyApiService {
         return tracks.stream()
                 .map(playlistTrackMapper::playlistTrackToPlaylistTrackDTO)
                 .toList();
+    }
+
+    public void reorderTracksInPlaylist(String playlistId) {
+        Validator.requireNotEmpty(playlistId, "Parameter 'playlistId' is required");
+        var spotifyApi = spotifyApiClientFactory.getSpotifyApiForCurrentUser();
+
+        try {
+            Playlist playlist = spotifyApi
+                    .getPlaylist(playlistId)
+                    .build()
+                    .execute();
+
+            Integer totalTracks = playlist.getTracks().getTotal();
+
+            Random random = new Random();
+            for (int i = 0; i < totalTracks; i++) {
+                int newTrackPosition = random.nextInt(totalTracks) + 1;
+
+                log.info("{} -> {} (previous -> next track position)", i, newTrackPosition);
+
+                ReorderPlaylistsItemsRequest reorderPlaylistsItemsRequest = spotifyApi
+                        .reorderPlaylistsItems(playlistId, i, newTrackPosition)
+                        .build();
+
+                reorderPlaylistsItemsRequest.execute();
+            }
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            throw new UnableToReorderPlaylistTracks(e);
+        }
     }
 }
