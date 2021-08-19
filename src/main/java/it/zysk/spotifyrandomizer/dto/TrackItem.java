@@ -1,22 +1,20 @@
 package it.zysk.spotifyrandomizer.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 @Builder
-public record TrackItem(String id,
-                        String name,
-                        String albumName,
-                        String albumImageUrl,
-                        Set<ArtistDTO> artists) implements PlaylistTrackItem {
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TrackItem implements PlaylistTrackItem {
+    private String id;
+    private String name;
+    private String albumName;
+    private String albumImageUrl;
+    private Set<ArtistDTO> artists;
 }
