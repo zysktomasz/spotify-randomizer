@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: spotifyrandomizer
+  profiles:
+    active: prod
+  cloud:
+    gcp:
+      config:
+        enabled: true

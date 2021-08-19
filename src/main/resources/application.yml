@@ -1,0 +1,15 @@
+spotify:
+  client-id: ${SPOTIFY_CLIENT_ID}
+  client-secret: ${SPOTIFY_CLIENT_SECRET}
+  redirect-uri: ${BACKEND_HOST}/auth/callback
+  scopes:
+    - user-read-private
+    - user-read-email
+    - playlist-modify-public
+
+webapp:
+  host: ${WEBAPP_HOST}
+  successful-login-handler-url: ${webapp.host}/successfulLoginHandler
+
+jwt:
+  secret-key: ${JWT_SECRET}
