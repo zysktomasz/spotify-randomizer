@@ -1,19 +1,24 @@
 {
   "properties": [
     {
-      "name": "clientId",
+      "name": "spotify.client-id",
       "type": "java.lang.String",
       "description": "clientId of app from Spotify Dashboard."
     },
     {
-      "name": "clientSecret",
+      "name": "spotify.client-secret",
       "type": "java.lang.String",
       "description": "clientSecret of app from Spotify Dashboard."
     },
     {
-      "name": "redirectUri",
+      "name": "spotify.redirect-uri",
       "type": "java.lang.String",
       "description": "URL that Spotify redirects user back to after authentication attempt."
+    },
+    {
+      "name": "spotify.scopes",
+      "type": "java.lang.String",
+      "description": "Spotify scopes required from user during authentication."
     },
     {
       "name": "jwt.secret-key",
@@ -21,9 +26,14 @@
       "description": "Secret Key used do sign JWT."
     },
     {
-      "name": "spotify.scopes",
+      "name": "webapp.host",
       "type": "java.lang.String",
-      "description": "Spotify scopes required from user during authentication."
+      "description": "Host of front-end application."
+    },
+    {
+      "name": "webapp.successful-login-handler-url",
+      "type": "java.lang.String",
+      "description": "Front-end application's URL that user is redirected to from backend after successful authentication."
     }
   ]
 }

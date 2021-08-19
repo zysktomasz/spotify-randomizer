@@ -22,7 +22,7 @@ public class AuthenticationServiceTests {
     private static final String PARAM_RESPONSE_TYPE = "response_type";
     private static final String PARAM_REDIRECT_URI = "redirect_uri";
     private static final String PARAM_SCOPE = "scope";
-    private static final String SPACE = " ";
+    private static final String PLUS = "+";
     private static final String AMPERSAND = "&";
 
     @Mock
@@ -64,6 +64,6 @@ public class AuthenticationServiceTests {
         return PARAM_CLIENT_ID + "=" + spotifyProperties.getClientId() +
                 AMPERSAND + PARAM_RESPONSE_TYPE + "=code" +
                 AMPERSAND + PARAM_REDIRECT_URI + "=" + spotifyProperties.getRedirectUri() +
-                AMPERSAND + PARAM_SCOPE + "=" + String.join(SPACE, spotifyProperties.getScopes());
+                AMPERSAND + PARAM_SCOPE + "=" + String.join(PLUS, spotifyProperties.getScopes());
     }
 }
