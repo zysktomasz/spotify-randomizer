@@ -1,0 +1,5 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'europe-central2-docker.pkg.dev/spotifyrandomizer/spotifyrandomizer-repo/spotifyrandomizer-backend:latest', '.' ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'push', 'europe-central2-docker.pkg.dev/spotifyrandomizer/spotifyrandomizer-repo/spotifyrandomizer-backend:latest' ]

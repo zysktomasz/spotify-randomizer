@@ -12,3 +12,14 @@ access them one has to have `Cloud SDK` installed with `beta runtime-config` add
 #### To list variables set for specific config (prod in this case)
 
 ```gcloud beta runtime-config configs variables list --config-name=spotifyrandomizer_prod --values```
+
+### Manually trigger GCP Cloud Build & Artifact Registry deploy
+
+You can manually trigger Docker image build and deployment of that image to GCP Artifact Registry by using `gcloud sdk`
+tools.
+
+In root directory of this project is `cloudbuild.yaml` file that defines configuration for this process.
+
+#### To invoke build and deploy run:
+
+`gcloud builds submit`
