@@ -2,8 +2,8 @@
 
 Google SDK Cloud Runtime documentation: https://cloud.google.com/sdk/gcloud/reference/beta/runtime-config
 
-A number of application properties set in `.yml` files are bootstraped from Google Cloud Runtime Config environments. To
-access them one has to have `Cloud SDK` installed with `beta runtime-config` added.
+A number of application properties set in `.yml` files are bootstrapped from Google Cloud Runtime Config environments.
+To access them one has to have `Cloud SDK` installed with `beta runtime-config` added.
 
 #### To list configs active for current project
 
@@ -12,6 +12,10 @@ access them one has to have `Cloud SDK` installed with `beta runtime-config` add
 #### To list variables set for specific config (prod in this case)
 
 ```gcloud beta runtime-config configs variables list --config-name=spotifyrandomizer_prod --values```
+
+#### To create/update variables
+
+`gcloud beta runtime-config configs variables set --config-name=spotifyrandomizer_prod my-var "my value"`
 
 ### Manually trigger GCP Cloud Build & Artifact Registry deploy
 
