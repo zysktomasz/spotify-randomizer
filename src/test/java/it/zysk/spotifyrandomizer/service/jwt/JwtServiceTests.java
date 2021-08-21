@@ -23,7 +23,7 @@ public class JwtServiceTests {
 
     @Test
     void Should_HaveExpectedClaims_When_BuiltJwtFromSpotifyUser() {
-        int expectedClaimsCount = 6;
+        int expectedClaimsCount = 7;
 
         var jwt = jwtService.buildSignedJwtForSpotifyUser(spotifyUser);
 

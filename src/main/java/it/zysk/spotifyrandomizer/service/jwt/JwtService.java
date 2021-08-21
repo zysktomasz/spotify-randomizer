@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import it.zysk.spotifyrandomizer.model.SpotifyUser;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class JwtService {
 
     private static final String ISSUER = "spotify-randomizer";
@@ -37,7 +39,7 @@ public class JwtService {
                 .claim(CLAIM_ACCESS_TOKEN, spotifyUser.getAccessToken())
                 .setIssuer(ISSUER)
                 .setIssuedAt(new Date())
-//                .setExpiration() // TODO: 06.07.2021 add expiration time limit, once token refreshing is implemented
+                .setExpiration(new Date(System.currentTimeMillis() + 1_800_000))
                 .signWith(this.key)
                 .compact();
     }
