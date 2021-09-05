@@ -68,7 +68,7 @@ jobs:
       - name: Use gcloud CLI (test)
         run: gcloud info
       - name: Authorize Docker push
-        run: gcloud auth configure-docker
+        run: gcloud auth configure-docker europe-central2-docker.pkg.dev
       - name: Build and push to Artifact Registry
         run: |-
           docker build -t europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }} .
