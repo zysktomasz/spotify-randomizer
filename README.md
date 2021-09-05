@@ -88,23 +88,11 @@ this functionality. It allows for application to load these properties from GCP 
 
 `gcloud beta runtime-config configs variables set --config-name=spotifyrandomizer_prod my-var "my value"`
 
-### Manually trigger GCP Cloud Build & Artifact Registry deploy
-
-You can manually trigger Docker image build and deployment of that image to GCP Artifact Registry by using `gcloud sdk`
-tools.
-
-In root directory of this project is `cloudbuild.yaml` file that defines configuration for this process.
-
-#### To invoke build and deploy run:
-
-`gcloud builds submit`
-
-
 ----------
 
-### Continuous Integration
+### Continuous Integration & Continuous Deployment
 
-[Github Actions](https://github.com/features/actions) are used to achieve CI. Actions are configured
+[Github Actions](https://github.com/features/actions) are used to achieve CI/CD. Actions are configured
 in [`github-ci.yml`](https://github.com/zysktomasz/spotify-randomizer/blob/master/.github/workflows/github-ci.yml)
 
 Steps done during CI:
@@ -113,12 +101,26 @@ Steps done during CI:
 2. Load cached maven packages (if available) from previous builds, to speed up process
 3. Run tests and build reports (by running `mvn site`)
 4. Verify output of previous step (`mvn verify`)
-5. Upload reports as github artifacts - makes it possible to download and analyze
+5. Upload reports as Github artifacts - makes it possible to download and analyze
+
+Steps done during CD:
+
+1. Check condition to confirm that _master_ branch can run deployment job.
+2. Configure Cloud SDK with credentials stored in _Github Secrets_
+3. Build and push Docker image to Google Artifact Registry
+4. Deploy image to Cloud Run
 
 ```
 name: Java Maven CI
 
 on: [ push ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SA_KEY }}
+  ARTIFACT_REPOSITORY_NAME: spotifyrandomizer-repo
+  SERVICE: spotifyrandomizer-backend
+  REGION: europe-central2
 
 jobs:
   test_and_build_reports:
@@ -150,22 +152,30 @@ jobs:
         with:
           name: reports
           path: target/site
+  build_and_release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: test_and_build_reports
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ env.SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker europe-central2-docker.pkg.dev
+      - name: Build and push to Artifact Registry
+        run: |-
+          docker build -t europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }} .
+          docker push europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }}
+      - name: Deploy to Cloud Run
+        run: |-
+          gcloud run deploy ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --image europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }} \
+            --platform "managed" \
 ```
 
 ----------
-
-### Continuous Deployment
-
-**TODO: this process will be modified and possibly migrated to Github Actions so that it will all be done by Github,
-automatically**
-
-Deployment is triggered manually by usage of *GCP Cloud SDK tools*.
-*Cloud Build* runs docker image build process and deployment of that image to GCP Artifact Registry by using.
-
-In root directory of this project is `cloudbuild.yaml` file that defines deployment process.
-
-Steps done during CD:
-
-1. Build image using `.Dockerfile`
-2. Push image to **GCP Artifact Repository**
-3. Deploy that image from Artifact Repository to **Cloud Run** as a new revision.

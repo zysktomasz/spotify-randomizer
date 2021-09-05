@@ -2,6 +2,13 @@ name: Java Maven CI
 
 on: [ push ]
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SA_KEY }}
+  ARTIFACT_REPOSITORY_NAME: spotifyrandomizer-repo
+  SERVICE: spotifyrandomizer-backend
+  REGION: europe-central2
+
 jobs:
   test_and_build_reports:
     runs-on: ubuntu-20.04
@@ -32,3 +39,27 @@ jobs:
         with:
           name: reports
           path: target/site
+  build_and_release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: test_and_build_reports
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ env.SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker europe-central2-docker.pkg.dev
+      - name: Build and push to Artifact Registry
+        run: |-
+          docker build -t europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }} .
+          docker push europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }}
+      - name: Deploy to Cloud Run
+        run: |-
+          gcloud run deploy ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --image europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }} \
+            --platform "managed" \
