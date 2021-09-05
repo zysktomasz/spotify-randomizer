@@ -40,6 +40,7 @@ jobs:
           name: reports
           path: target/site
   build_and_release:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: test_and_build_reports
     runs-on: ubuntu-20.04
     steps:
@@ -64,4 +65,3 @@ jobs:
             --region ${{ env.REGION }} \
             --image europe-central2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY_NAME }}/${{ env.SERVICE }}:${{ github.sha }} \
             --platform "managed" \
-#            --quiet
